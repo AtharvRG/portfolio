@@ -38,9 +38,12 @@ import {
   IconRobot,
   IconBoxMultiple,
 } from "@tabler/icons-react";
+import { SiMongodb } from "react-icons/si";
+import { TbSql } from "react-icons/tb";
 
 // React Icons (for Contact Section)
-import { FaLinkedinIn, FaGithub, FaTwitter, FaInstagram, FaDiscord, FaEnvelope } from "react-icons/fa";
+import { FaLinkedinIn, FaGithub, FaTwitter, FaInstagram, FaDiscord, FaEnvelope, FaBitcoin } from "react-icons/fa";
+
 
 // --- DATA ---
 const heroDetails = {
@@ -74,15 +77,15 @@ const techStack = [
   {
     id: 3, title: "Backend & Databases", className: "md:col-span-1",
     items: [
-      { name: "SQL", description: "Queries on speaking terms.", icon: <IconDatabase size={24} className="text-amber-500" /> },
-      { name: "MongoDB", description: "NoSQL, no problem (usually).", icon: <IconDatabase size={24} className="text-green-500" /> },
+      { name: "SQL", description: "Queries on speaking terms.", icon: <SiMongodb size={24} className="text-amber-500" /> },
+      { name: "MongoDB", description: "NoSQL, no problem (usually).", icon: <TbSql size={24} className="text-green-500" /> },
     ],
   },
   {
     id: 4, title: "Emerging Interests", className: "md:col-span-2",
     items: [
       { name: "AI/ML", description: "Falling into the rabbit hole... send snacks.", icon: <IconCpu size={24} className="text-purple-400" /> },
-      { name: "Blockchain", description: "Tech? Super cool. Crypto? Still figuring it out.", icon: <IconCube size={24} className="text-pink-400" /> },
+      { name: "Blockchain", description: "Tech? Super cool. Crypto? Still figuring it out.", icon: <FaBitcoin size={24} className="text-pink-400" /> },
     ],
   },
 ];
