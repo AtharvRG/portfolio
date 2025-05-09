@@ -77,8 +77,8 @@ const techStack = [
   {
     id: 3, title: "Backend & Databases", className: "md:col-span-1",
     items: [
-      { name: "SQL", description: "Queries on speaking terms.", icon: <SiMongodb size={24} className="text-amber-500" /> },
-      { name: "MongoDB", description: "NoSQL, no problem (usually).", icon: <TbSql size={24} className="text-green-500" /> },
+      { name: "SQL", description: "Queries on speaking terms.", icon: <SiMongodb size={24} className="text-green-500" /> },
+      { name: "MongoDB", description: "NoSQL, no problem (usually).", icon: <TbSql size={24} className="text-amber-500" /> },
     ],
   },
   {
