@@ -40,7 +40,7 @@ import {
 } from "@tabler/icons-react";
 
 // React Icons (for Contact Section)
-import { FaLinkedinIn, FaGithub, FaTwitter, FaInstagram, FaDiscord, FaEnvelope } from 'react-icons/fa';
+import { FaLinkedinIn, FaGithub, FaTwitter, FaInstagram, FaDiscord, FaEnvelope } from "react-icons/fa";
 
 // --- DATA ---
 const heroDetails = {
@@ -48,7 +48,7 @@ const heroDetails = {
   titlePart2: "Powered by Stack Overflow and Hope",
   name: "Atharv R Gachchi",
   headline: "Transforming Curiosity into Code.",
-  intro: "Hey there! I'm Atharv R Gachchi, a student with a lifelong curiosity for technology, now channeling it into software development. From keypad mobiles to complex algorithms, I love figuring out how things work and building solutions.",
+  intro: "Hey there! I&apos;m Atharv R Gachchi, a student with a lifelong curiosity for technology, now channeling it into software development. From keypad mobiles to complex algorithms, I love figuring out how things work and building solutions.",
   profilePic: "/profile-no-bg.png", 
   cvLink: "/atharv_gachchi_cv.pdf", 
 };
@@ -222,7 +222,7 @@ const ProjectFeatureItem = ({ title, description, icon, index, tech, links }: {
       {!isLastRow && (
         <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-neutral-900 dark:from-neutral-800 to-transparent pointer-events-none" />
       )}
-      {isLastRow && index >= numCols * (totalRows -1) && ( // Only for items in the last visual row if it's a full row
+      {isLastRow && index >= numCols * (totalRows -1) && ( 
          <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-neutral-900 dark:from-neutral-800 to-transparent pointer-events-none" />
       )}
       <div className="mb-4 relative z-10 px-10 text-neutral-400 dark:text-neutral-400">{icon}</div>
@@ -297,13 +297,7 @@ const ContactCard = ({ platform, value, icon, link, colors }: {
                 dotSize={2}
                 opacities={[0.2, 0.2, 0.3, 0.3, 0.4, 0.6, 0.8, 1, 1, 1]} // Ensure full opacity at the end
                 showGradient={false} // By default, CanvasRevealEffect adds a dark gradient overlay.
-                                      // Set to false if you don't want it, especially if containerClassName provides the full bg.
-                                      // For the twitter example, it seems like the gradient is part of the effect or desired.
-                                      // If the twitter card's dot pattern *is* the background, then showGradient might be true or the gradient is implicit.
-                                      // The demo for CanvasRevealEffect itself adds a radial gradient mask,
-                                      // which is different from the `showGradient` prop.
               />
-               {/* Optional: Add a subtle overlay if needed, like in the CanvasRevealEffectDemo for "Nisha is Munni" */}
 
             </motion.div>
           )}
@@ -373,7 +367,6 @@ export default function PortfolioPage() {
       >
         {/* Changed items-end to items-center for the grid to vertically center content, image will still stick to bottom via its own container */}
         <div className="relative z-10 grid grid-cols-1 md:grid-cols-10 gap-x-8 gap-y-10 items-center w-full max-w-7xl mx-auto px-4">
-          {/* Text Content Area - self-center to ensure it's centered vertically within its allocated space */}
           <div className="md:col-span-6 lg:col-span-5 text-left self-center">
             <motion.h1
               className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-white" // Removed specific line-height, will control with margins
@@ -496,7 +489,7 @@ export default function PortfolioPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-purple-400">Creations & Code</h2>
            <p className="text-center text-neutral-400 mb-12 md:mb-16 text-lg max-w-2xl mx-auto">
-            A glimpse into projects I've built, challenges I've tackled, and ideas I've brought to life.
+            A glimpse into projects I&apos;ve built, challenges I&apos;ve tackled, and ideas I&apos;ve brought to life.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 relative z-10 max-w-6xl mx-auto border-t border-l border-neutral-800">
             {projectsDataForFeature.map((project, index) => (
@@ -542,9 +535,9 @@ export default function PortfolioPage() {
       {/* Contact Section */}
       <section id="contact" className="py-20 md:py-28 bg-black">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-pink-500">Let's Connect</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-pink-500">Let&apos;s Connect</h2>
           <p className="text-center text-neutral-400 mb-12 md:mb-16 text-lg max-w-2xl mx-auto">
-            You’ve scrolled this far, might as well say hi! I'm open to opportunities, collaborations, or just a chat about tech.
+            You’ve scrolled this far, might as well say hi! I&apos;m open to opportunities, collaborations, or just a chat about tech.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch justify-center w-full gap-6 md:gap-8 max-w-5xl mx-auto">
             {contactInfo.map((contact) => (
