@@ -40,7 +40,7 @@ import {
 } from "@tabler/icons-react";
 import { SiMongodb } from "react-icons/si";
 import { TbSql } from "react-icons/tb";
-
+import { FaXTwitter } from "react-icons/fa6";
 // React Icons (for Contact Section)
 import { FaLinkedinIn, FaGithub, FaTwitter, FaInstagram, FaDiscord, FaEnvelope, FaBitcoin } from "react-icons/fa";
 
@@ -170,11 +170,11 @@ const aboutMe = {
 
 const contactInfo = [
   { platform: "Email", value: "atharv2703123@gmail.com", link: "mailto:atharv2703123@gmail.com", icon: <FaEnvelope/>, colors: [[220, 38, 38]] },
-  { platform: "LinkedIn", value: "in/atharvrgachchi", link: "https://www.linkedin.com/in/atharvrgachchi/", icon: <FaLinkedinIn/>, colors: [[37, 99, 235]] },
-  { platform: "GitHub", value: "@AtharvRG", link: "https://github.com/AtharvRG", icon: <FaGithub/>, colors: [[55, 65, 81]] },
-  { platform: "Twitter", value: "@AGachchi", link: "https://x.com/AGachchi", icon: <FaTwitter/>, colors: [[29, 161, 242]] },
-  { platform: "Instagram", value: "@kairoarg", link: "https://www.instagram.com/kairoarg/", icon: <FaInstagram/>, colors: [[192, 38, 211]] },
-  { platform: "Discord", value: "KairoARG#2299", link: "#", icon: <FaDiscord/>, colors: [[88, 101, 242]] },
+  { platform: "LinkedIn", value: "in/atharvrgachchi", link: "https://www.linkedin.com/in/atharvrgachchi/", icon: <FaLinkedinIn/>, colors: [[8, 130, 189]] },
+  { platform: "GitHub", value: "@AtharvRG", link: "https://github.com/AtharvRG", icon: <FaGithub/>, colors: [[192, 192, 192]] },
+  { platform: "X (Formerly Twitter)", value: "@AGachchi", link: "https://x.com/AGachchi", icon: <FaXTwitter/>, colors: [[125, 125, 125]] },
+  { platform: "Instagram", value: "@kairoarg", link: "https://www.instagram.com/kairoarg/", icon: <FaInstagram/>, colors: [[197, 49, 166]] },
+  { platform: "Discord", value: "KairoARG#2299", link: "#", icon: <FaDiscord/>, colors: [[85, 98, 234]] },
 ];
 const closingMessage = "Open to opportunities, collaborations, or just a chat about tech (or terrible puns!).";
 
