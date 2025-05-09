@@ -48,7 +48,7 @@ const heroDetails = {
   titlePart2: "Powered by Stack Overflow and Hope",
   name: "Atharv R Gachchi",
   headline: "Transforming Curiosity into Code.",
-  intro: "Hey there! I&apos;m Atharv R Gachchi, a student with a lifelong curiosity for technology, now channeling it into software development. From keypad mobiles to complex algorithms, I love figuring out how things work and building solutions.",
+  intro: "Hey there! I am Atharv R Gachchi, a student with a lifelong curiosity for technology, now channeling it into software development. From keypad mobiles to complex algorithms, I love figuring out how things work and building solutions.",
   profilePic: "/profile-no-bg.png", 
   cvLink: "/atharv_gachchi_cv.pdf", 
 };
@@ -437,16 +437,22 @@ export default function PortfolioPage() {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: refinedHeroDetails.titleLine1.length * 0.07 + 1.3, duration: 0.5 }}
             >
-              <HoverBorderGradient
-                  as="a" href={heroDetails.cvLink} target="_blank" rel="noopener noreferrer"
-                  containerClassName="rounded-full border-transparent" 
-                  className="bg-gradient-to-r from-sky-500 to-cyan-400 hover:from-sky-600 hover:to-cyan-500 text-white flex items-center space-x-2 px-6 py-3 text-sm font-semibold shadow-lg hover:shadow-sky-500/30 transition-all duration-300 transform hover:scale-105"
-              ><IconDownload size={18} /> <span>Download CV</span></HoverBorderGradient>
-              <HoverBorderGradient
-                  as="a" href="https://github.com/AtharvRG" target="_blank" rel="noopener noreferrer"
-                  containerClassName="rounded-full border-transparent"
-                  className="bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white flex items-center space-x-2 px-5 py-2.5 text-sm font-medium"
-              ><IconBrandGithubTabler size={16}/> <span>GitHub</span></HoverBorderGradient>
+              <Link href={heroDetails.cvLink} passHref legacyBehavior>
+                <a target="_blank" rel="noopener noreferrer">
+                  <HoverBorderGradient
+                    containerClassName="rounded-full border-transparent" 
+                    className="bg-gradient-to-r from-sky-500 to-cyan-400 hover:from-sky-600 hover:to-cyan-500 text-white flex items-center space-x-2 px-6 py-3 text-sm font-semibold shadow-lg hover:shadow-sky-500/30 transition-all duration-300 transform hover:scale-105"
+                  ><IconDownload size={18} /> <span>Download CV</span></HoverBorderGradient>
+                </a>
+              </Link>
+              <Link href="https://github.com/AtharvRG" passHref legacyBehavior>
+                <a target="_blank" rel="noopener noreferrer">
+                  <HoverBorderGradient
+                    containerClassName="rounded-full border-transparent"
+                    className="bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white flex items-center space-x-2 px-5 py-2.5 text-sm font-medium"
+                  ><IconBrandGithubTabler size={16}/> <span>GitHub</span></HoverBorderGradient>
+                </a>
+              </Link>
             </motion.div>
           </div>
 
@@ -489,7 +495,7 @@ export default function PortfolioPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-6 text-purple-400">Creations & Code</h2>
            <p className="text-center text-neutral-400 mb-12 md:mb-16 text-lg max-w-2xl mx-auto">
-            A glimpse into projects I&apos;ve built, challenges I&apos;ve tackled, and ideas I&apos;ve brought to life.
+            A glimpse into projects I have built, challenges I have tackled, and ideas I have brought to life.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 relative z-10 max-w-6xl mx-auto border-t border-l border-neutral-800">
             {projectsDataForFeature.map((project, index) => (
@@ -537,7 +543,7 @@ export default function PortfolioPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-pink-500">Let&apos;s Connect</h2>
           <p className="text-center text-neutral-400 mb-12 md:mb-16 text-lg max-w-2xl mx-auto">
-            You’ve scrolled this far, might as well say hi! I&apos;m open to opportunities, collaborations, or just a chat about tech.
+            You’ve scrolled this far, might as well say hi! I am open to opportunities, collaborations, or just a chat about tech.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-stretch justify-center w-full gap-6 md:gap-8 max-w-5xl mx-auto">
             {contactInfo.map((contact) => (
