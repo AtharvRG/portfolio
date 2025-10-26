@@ -1,0 +1,24 @@
+/* src/app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-olive-dark text-off-white;
+}
+
+@keyframes fadein-slideup {
+  0% {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadein-slideup {
+  animation-name: fadein-slideup;
+  animation-fill-mode: both;
+}
