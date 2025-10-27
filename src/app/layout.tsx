@@ -44,7 +44,7 @@ const ebGaramond = EB_Garamond({
 });
 
 const ppn = localFont({
-  src: '../fonts/ppneuebit-Bold.otf',
+  src: '../fonts/ppneuebit-bold.otf',
   variable: '--font-ppn',
 });
 
