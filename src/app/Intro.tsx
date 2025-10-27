@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import Options from './Options';
@@ -20,7 +21,7 @@ export default function Intro() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [step, setStep] = useState(0);
   const [shuffledPics, setShuffledPics] = useState<string[]>([]);
-  const router = require('next/navigation').useRouter();
+  const router = useRouter();
 
   // Shuffle the images once on mount
   useEffect(() => {
@@ -58,23 +59,25 @@ export default function Intro() {
       clearTimeout(showOptionsTimer);
         clearTimeout(redirectTimer);
     };
-  }, []);
+  }, [router]);
 
   return (
     <div className="relative flex items-center justify-center h-screen w-screen bg-background overflow-hidden">
       {step < 4 && (
         <>
-          <div className="absolute" style={{ width: '45rem', height: '45rem' }}>
-            <Image
-              src={shuffledPics[currentImageIndex]}
-              alt="Face"
-              fill
-              className="object-cover rounded-md"
-              priority
-              sizes="240px"
-              draggable={false}
-            />
-          </div>
+          {shuffledPics.length > 0 && (
+            <div className="absolute" style={{ width: '45rem', height: '45rem' }}>
+              <Image
+                src={shuffledPics[currentImageIndex]}
+                alt="Face"
+                fill
+                className="object-cover rounded-md"
+                priority
+                sizes="240px"
+                draggable={false}
+              />
+            </div>
+          )}
           {/* Keep the overlay fade for step >= 1, but remove animation */}
           <div
             className="absolute inset-0 bg-background/70 backdrop-blur-lg"

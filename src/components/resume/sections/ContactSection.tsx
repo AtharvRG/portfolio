@@ -16,10 +16,10 @@ export default function ContactSection() {
     <section className="py-20 text-center">
       <SectionHeader title="Get In Touch" />
       <h2 className="font-harmond text-3xl md:text-4xl text-off-white">
-        Let's Build Something Great
+        Let&apos;s Build Something Great
       </h2>
       <p className="font-gotham text-pink-light/80 mt-4 max-w-xl mx-auto">
-        I'm currently seeking opportunities to contribute to innovative, growth-oriented tech environments. Feel free to reach out!
+        I&apos;m currently seeking opportunities to contribute to innovative, growth-oriented tech environments. Feel free to reach out!
       </p>
       <div className="flex justify-center gap-6 mt-8">
         {socials.map((social, index) => (

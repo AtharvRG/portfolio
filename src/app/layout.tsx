@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { DM_Serif_Display, EB_Garamond, Lato, Roboto_Flex } from "next/font/google";
 import "./globals.css";
+import DeviceGuard from "@/components/DeviceGuard";
 
 const NeueFont = localFont({
   src: [
@@ -95,8 +96,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={` ${lato.variable} ${ebGaramond.variable} ${gothamFont.variable} ${wistleFont.variable} ${NeueFont.variable} ${MayesFont.variable} ${NuraFont.variable} ${dmSerif.variable} ${ppn.variable} ${verFont.variable} ${danceFont.variable} ${harmondFont.variable}`}> 
-      <body>{children}</body>
+    <html lang="en" className={` ${lato.variable} ${ebGaramond.variable} ${gothamFont.variable} ${wistleFont.variable} ${NeueFont.variable} ${MayesFont.variable} ${NuraFont.variable} ${dmSerif.variable} ${ppn.variable} ${verFont.variable} ${danceFont.variable} ${harmondFont.variable}`}>
+      <body>
+        <DeviceGuard>{children}</DeviceGuard>
+      </body>
     </html>
   );
 }

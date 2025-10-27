@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 import SectionHeader from './SectionHeader';
 import { ExternalLink } from 'lucide-react';
-import { link } from 'fs';
 
 const courses = [
     { title: "Developing Front-End Apps with React", provider: "IBM - Coursera", link: "https://www.coursera.org/account/accomplishments/certificate/SBMFJSDQZHVK" },

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import ScrambledText from '@/components/effects/ScrambledText';
+import heroBg from '../../../public/hero-bg.jpg';
 
 
 
@@ -19,10 +20,12 @@ const SectionWrapper = ({ children, backgroundPositionY = 0 }: { children: React
       transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
     >
       <Image
-        src="/hero-bg.jpg"
+        src={heroBg}
         alt="Background"
         fill
         priority
+        placeholder="blur"
+        quality={72}
         style={{
           objectFit: 'cover',
           objectPosition: `center ${backgroundPositionY}px`,

@@ -19,7 +19,7 @@ const ScrollFloat: React.FC<ScrollFloatProps> = ({
   scrollContainerRef,
   containerClassName = '',
   textClassName = '',
-  animationDuration = 6,
+  animationDuration = 2,
   stagger = 0.03
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
