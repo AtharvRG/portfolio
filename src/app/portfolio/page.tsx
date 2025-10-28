@@ -15,30 +15,6 @@ export default function PortfolioPage() {
   // THE FIX: Register the GSAP plugin ONCE when the page mounts.
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    
-    // Performance optimization for production builds
-    // Ensure ScrollTrigger recalculates after all content is loaded
-    const handleLoad = () => {
-      ScrollTrigger.refresh();
-    };
-    
-    // If document already loaded, refresh immediately
-    if (document.readyState === 'complete') {
-      ScrollTrigger.refresh();
-    } else {
-      window.addEventListener('load', handleLoad);
-    }
-    
-    // Also refresh after fonts load to ensure accurate positioning
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => {
-        ScrollTrigger.refresh();
-      });
-    }
-    
-    return () => {
-      window.removeEventListener('load', handleLoad);
-    };
   }, []);
 
   return (
