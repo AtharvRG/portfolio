@@ -66,10 +66,11 @@ const ScrollFloat: React.FC<ScrollFloatProps> = ({
           stagger: stagger,
           scrollTrigger: {
             trigger: containerRef.current,
-            scroller: scrollContainerRef.current, // Explicitly tell ScrollTrigger what to watch
-            start: 'top 90%', // Start when the top of the text enters 90% from the bottom of the viewport
-            end: 'bottom 60%', // End when the bottom of the text reaches 60% from the top
-            scrub: 1.5 // A smooth scrub value
+            scroller: scrollContainerRef.current,
+            start: 'top 90%',
+            end: 'bottom 60%',
+            scrub: 3, // Much faster response - reduced from 1.5 for quicker animation
+            invalidateOnRefresh: true // Recalculate on resize for production builds
           }
         }
       );
