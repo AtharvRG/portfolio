@@ -1,11 +1,12 @@
 // src/app/Intro.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import Options from './Options';
+import { useLoader } from '@/components/LoaderContext';
 
 const facePics = [
   '/1.png',
@@ -21,7 +22,9 @@ export default function Intro() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [step, setStep] = useState(0);
   const [shuffledPics, setShuffledPics] = useState<string[]>([]);
+  const animationStarted = useRef(false);
   const router = useRouter();
+  const { isLoading } = useLoader();
 
   // Shuffle the images once on mount
   useEffect(() => {
@@ -33,33 +36,43 @@ export default function Intro() {
     setShuffledPics(shuffled);
   }, []);
 
+  // Image cycling - only run during step 0 (first 3 seconds after loader)
   useEffect(() => {
-    if (shuffledPics.length === 0) return;
+    if (shuffledPics.length === 0 || isLoading || step >= 1) return;
     const interval = setInterval(() => {
       setCurrentImageIndex(prevIndex => (prevIndex + 1) % shuffledPics.length);
     }, 500);
     return () => clearInterval(interval);
-  }, [shuffledPics]);
+  }, [shuffledPics, isLoading, step]);
 
+  // Animation sequence - wait for loader to finish before starting
   useEffect(() => {
-    const showArgTimer = setTimeout(() => setStep(1), 2500);
-    const revealTimer = setTimeout(() => setStep(2), 4000);
-    const vanishNameTimer = setTimeout(() => setStep(3), 5000);
-    const showOptionsTimer = setTimeout(() => setStep(4), 5500);
+    // Don't start until loader is done
+    if (isLoading) return;
+    
+    // Prevent re-running if already started
+    if (animationStarted.current) return;
+    animationStarted.current = true;
 
-      // Redirect to /options after intro animation
-      const redirectTimer = setTimeout(() => {
-        router.replace('/options');
-      }, 5700);
+    // 3 seconds of face cycling, then show ARG
+    const showArgTimer = setTimeout(() => setStep(1), 3000);
+    const revealTimer = setTimeout(() => setStep(2), 4500);
+    const vanishNameTimer = setTimeout(() => setStep(3), 5500);
+    const showOptionsTimer = setTimeout(() => setStep(4), 6000);
+
+    // Redirect to /options after intro animation
+    const redirectTimer = setTimeout(() => {
+      router.replace('/options');
+    }, 6200);
 
     return () => {
       clearTimeout(showArgTimer);
       clearTimeout(revealTimer);
       clearTimeout(vanishNameTimer);
       clearTimeout(showOptionsTimer);
-        clearTimeout(redirectTimer);
+      clearTimeout(redirectTimer);
     };
-  }, [router]);
+  }, [router, isLoading]);
 
   return (
     <div className="relative flex items-center justify-center h-screen w-screen bg-background overflow-hidden">
@@ -78,7 +91,7 @@ export default function Intro() {
               />
             </div>
           )}
-          {/* Keep the overlay fade for step >= 1, but remove animation */}
+          {/* Overlay fade for step >= 1 */}
           <div
             className="absolute inset-0 bg-background/70 backdrop-blur-lg"
             style={{ opacity: step >= 1 ? 1 : 0, transition: 'opacity 0.5s ease-out' }}
@@ -86,7 +99,7 @@ export default function Intro() {
         </>
       )}
 
-      {/* Keep the animated name reveal as before */}
+      {/* Animated name reveal */}
       <AnimatePresence>
         {step >= 1 && step < 3 && (
           <motion.div

@@ -3,8 +3,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Smooth scroll for all browsers including Chromium */
+@layer base {
+  html, body {
+    scroll-behavior: smooth;
+  }
+  
+  /* Target scrollable containers explicitly */
+  main,
+  [class*="overflow-y-scroll"],
+  [class*="overflow-scroll"],
+  [class*="overflow-auto"] {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
+  }
+
+  /* Smoother scroll-snap for Chrome/Chromium browsers */
+  .snap-y {
+    scroll-snap-type: y proximity; /* proximity is less aggressive than mandatory */
+    scroll-padding: 0;
+  }
+
+  .snap-start {
+    scroll-snap-align: start;
+    scroll-snap-stop: normal; /* Allow momentum scrolling past snap points */
+  }
+
+  /* GPU acceleration for smoother scrolling */
+  main {
+    will-change: scroll-position;
+    transform: translateZ(0); /* Force GPU layer */
+    -webkit-transform: translateZ(0);
+  }
+
+  /* Snap sections should also be GPU accelerated */
+  .snap-start,
+  section {
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
+
 body {
   @apply bg-olive-dark text-off-white;
+  transition: opacity 0.3s ease;
 }
 
 @keyframes fadein-slideup {
