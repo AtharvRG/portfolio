@@ -117,7 +117,7 @@ export default function PageLoader() {
             animate={{ opacity: 1 }}
             transition={{ delay: 1, duration: 0.5 }}
           >
-            Please wait till the site loads all the components for best experience
+            Please wait till the site loads all the assets for best experience
           </motion.p>
         </motion.div>
       )}
