@@ -39,6 +39,7 @@ const agno = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://atharv.is-a-good.dev"),
   title: "Atharv | Creative Developer",
   description: "A digital portfolio.",
   openGraph: {
@@ -54,6 +55,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Atharv | Creative Developer",
     description: "A digital portfolio.",
+    creator: "@AGachchi",
+    site: "@AGachchi",
     images: ["/og-image.png"],
   },
 };
