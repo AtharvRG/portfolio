@@ -48,11 +48,13 @@ export const metadata: Metadata = {
     siteName: "Atharv's Portfolio",
     locale: "en_IN",
     type: "website",
+    images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Atharv | Creative Developer",
     description: "A digital portfolio.",
+    images: ["/og-image.png"],
   },
 };
 
