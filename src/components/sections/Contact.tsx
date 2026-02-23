@@ -375,9 +375,9 @@ export default function Contact() {
       {/* BOTTOM: TECHNICAL META DATA */}
       <div className="w-full grid grid-cols-2 md:grid-cols-3 px-4 md:px-12 py-8 gap-8 md:gap-0">
         <div className="flex flex-col items-start justify-center">
-          <div className="overflow-hidden"><p className="meta-reveal font-agno text-[10px] uppercase tracking-[0.2em] text-zinc-400 mb-1">Local Time</p></div>
+          <div className="overflow-hidden"><p className="meta-reveal font-agno text-[10px] uppercase tracking-[0.2em] text-zinc-400 mb-1">Local Time (GMT +5:30)</p></div>
           <div className="overflow-hidden">
-            <div className="meta-reveal flex items-baseline font-sans text-sm md:text-base uppercase tracking-widest text-zinc-300 tabular-nums w-[120px]">
+            <div className="meta-reveal cursor-target flex items-baseline font-sans text-sm md:text-base uppercase tracking-widest text-zinc-300 tabular-nums w-[120px]">
               <span>{time || "00:00:00"}</span>
               <span className="text-[10px] text-zinc-400 ml-1 w-[20px]">:{ms || "00"}</span>
             </div>
@@ -386,7 +386,7 @@ export default function Contact() {
         <div className="flex flex-col items-start md:items-center justify-center">
           <div className="overflow-hidden"><p className="meta-reveal font-agno text-[10px] uppercase tracking-[0.2em] text-zinc-400 mb-1">Location</p></div>
           <div className="overflow-hidden">
-            <p className="meta-reveal font-sans text-sm md:text-base uppercase tracking-widest text-zinc-300">Planet Earth</p>
+            <p className="meta-reveal font-sans text-sm md:text-base uppercase tracking-widest text-zinc-300 cursor-target">Planet Earth</p>
           </div>
         </div>
         <div className="flex flex-col items-start md:items-end justify-center col-span-2 md:col-span-1">
@@ -394,7 +394,7 @@ export default function Contact() {
           <div className="overflow-hidden">
             <button
               onClick={() => lenis?.scrollTo(0, { duration: 1.5, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) })}
-              className="meta-reveal group font-sans text-sm md:text-base uppercase tracking-widest text-zinc-300 hover:text-white transition-colors"
+              className="meta-reveal group font-sans text-sm md:text-base uppercase tracking-widest text-zinc-300 hover:text-white transition-colors cursor-target"
             >
               Back to Top <span className="inline-block transition-transform duration-300 group-hover:-translate-y-1">↑</span>
             </button>

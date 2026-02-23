@@ -95,7 +95,7 @@ export default function ProjectsShowcase() {
                 animate={{ opacity: 1, scale: 1, z: 0 }}
                 exit={{ opacity: 0, scale: 0.95, z: 0 }}
                 transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-                className="absolute inset-0 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl bg-zinc-900 border border-white/10 will-change-transform"
+                className="absolute inset-0 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl will-change-transform"
                 style={{ transform: "translateZ(0)" }}
               >
                 <Image src={project.src} alt={project.title} className="object-cover opacity-80" fill unoptimized sizes="(min-width: 1024px) 500px, (min-width: 768px) 400px, 280px" />
