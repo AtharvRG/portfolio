@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import { isSafari, isMobile } from "../../utils/detectBrowser";
 import { ArrowRight } from "lucide-react";
 import { useLenis } from "@studio-freight/react-lenis";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 // --- Utility to split text into characters for GSAP ---
 const SplitText = ({ text, className = "" }: { text: string, className?: string }) => {
@@ -108,9 +108,10 @@ const FlowingRow: React.FC<MenuItemData & { speed?: number }> = ({
 
       if (animationRef.current) animationRef.current.kill();
 
+      const effectiveSpeed = (typeof window !== 'undefined' && (isSafari() || isMobile())) ? Math.max(speed * 2, 30) : speed;
       animationRef.current = gsap.to(marqueeInnerRef.current, {
         x: -contentWidth,
-        duration: speed,
+        duration: effectiveSpeed,
         ease: 'none',
         repeat: -1,
         force3D: true
@@ -295,44 +296,105 @@ export default function Contact() {
 
   // Precision Clock
   useEffect(() => {
-    let animationFrameId: number;
-    const updateTime = () => {
+    // Use an interval to avoid rerendering every rAF frame — keeps CPU lower on Safari/Firefox
+    let mounted = true;
+    const tick = () => {
+      if (!mounted) return;
       const now = new Date();
       setTime(now.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }));
       setMs(now.getMilliseconds().toString().padStart(3, '0').slice(0, 2));
-      animationFrameId = requestAnimationFrame(updateTime);
     };
-    animationFrameId = requestAnimationFrame(updateTime);
-    return () => cancelAnimationFrame(animationFrameId);
+    tick();
+    const id = window.setInterval(tick, 100);
+    return () => { mounted = false; clearInterval(id); };
   }, []);
 
-  // GSAP Cinematic Entrance
+  // GSAP Cinematic Entrance — lazily load ScrollTrigger when the section enters viewport.
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 75%",
+    let ctx: gsap.Context | null = null;
+    let observer: IntersectionObserver | null = null;
+
+    const fallbackReveal = () => {
+      const chars = containerRef.current?.querySelectorAll('.char-reveal') ?? [];
+      const rows = containerRef.current?.querySelectorAll('.footer-row-anim') ?? [];
+      const metas = containerRef.current?.querySelectorAll('.meta-reveal') ?? [];
+
+      chars.forEach((el, i) => {
+        const node = el as HTMLElement;
+        node.style.transition = 'transform 1.2s cubic-bezier(.19,1,.22,1) ' + (i * 0.03) + 's, opacity 1.2s ' + (i * 0.03) + 's';
+        node.style.transform = 'translateY(0%) rotateZ(0deg) scale(1)';
+        node.style.opacity = '1';
+      });
+      rows.forEach((el, i) => {
+        const node = el as HTMLElement;
+        node.style.transition = 'transform 1.2s cubic-bezier(.19,1,.22,1) ' + (i * 0.1) + 's';
+        node.style.transform = 'translateY(0%)';
+      });
+      metas.forEach((el, i) => {
+        const node = el as HTMLElement;
+        node.style.transition = 'transform 1s cubic-bezier(.19,1,.22,1) ' + (i * 0.05) + 's';
+        node.style.transform = 'translateY(0%)';
+      });
+    };
+
+    const onIntersect: IntersectionObserverCallback = (entries) => {
+      entries.forEach(async (entry) => {
+        if (!entry.isIntersecting) return;
+
+        // If Safari, use the lightweight fallback (Safari's ScrollTrigger + heavy transforms can be janky)
+        if (isSafari()) {
+          fallbackReveal();
+          if (observer) observer.disconnect();
+          return;
+        }
+
+        try {
+          const ScrollTriggerModule = await import('gsap/ScrollTrigger');
+          gsap.registerPlugin(ScrollTriggerModule.ScrollTrigger);
+
+          ctx = gsap.context(() => {
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: containerRef.current,
+                start: 'top 75%'
+              }
+            });
+
+            tl.fromTo('.char-reveal',
+              { yPercent: 130, rotateZ: 10, scale: 0.9, opacity: 0 },
+              { yPercent: 0, rotateZ: 0, scale: 1, opacity: 1, duration: 1.2, stagger: 0.03, ease: 'expo.out' }
+            )
+              .fromTo('.footer-row-anim',
+                { yPercent: 100 },
+                { yPercent: 0, duration: 1.2, stagger: 0.1, ease: 'expo.out' },
+                '-=0.8'
+              )
+              .fromTo('.meta-reveal',
+                { yPercent: 100 },
+                { yPercent: 0, duration: 1, stagger: 0.05, ease: 'expo.out' },
+                '-=0.9'
+              );
+          }, containerRef);
+
+          if (observer) observer.disconnect();
+        } catch (err) {
+          // If dynamic import fails, fall back to simple reveal
+          fallbackReveal();
+          if (observer) observer.disconnect();
         }
       });
+    };
 
-      tl.fromTo(".char-reveal",
-        { yPercent: 130, rotateZ: 10, scale: 0.9, opacity: 0 },
-        { yPercent: 0, rotateZ: 0, scale: 1, opacity: 1, duration: 1.2, stagger: 0.03, ease: "expo.out" }
-      )
-        .fromTo(".footer-row-anim",
-          { yPercent: 100 },
-          { yPercent: 0, duration: 1.2, stagger: 0.1, ease: "expo.out" },
-          "-=0.8"
-        )
-        .fromTo(".meta-reveal",
-          { yPercent: 100 },
-          { yPercent: 0, duration: 1, stagger: 0.05, ease: "expo.out" },
-          "-=0.9"
-        );
-    }, containerRef);
-    return () => ctx.revert();
+    if (containerRef.current) {
+      observer = new IntersectionObserver(onIntersect, { threshold: 0.25 });
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (observer) observer.disconnect();
+      if (ctx) ctx.revert();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

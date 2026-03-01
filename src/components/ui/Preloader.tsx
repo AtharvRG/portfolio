@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
+import { isSafari } from "../../utils/detectBrowser";
 import { useLoad } from "@/context/LoadContext";
 import Counter from "./Counter";
 import { StaticImageData } from "next/image";
@@ -33,50 +33,102 @@ export default function Preloader() {
     let loadedCount = 0;
     const totalAssets = ASSETS_TO_PRELOAD.length;
 
-    // A proxy object for GSAP to animate the number smoothly
-    const progressObj = { value: 0 };
+    // A proxy object for GSAP to animate the number smoothly — we will lazy-load GSAP.
+    const progressObj: { value: number } = { value: 0 };
 
-    const updateProgress = () => {
+    let gsapInstance: any = null;
+    let gsapAvailable = false;
+
+    const animateWithGSAP = async (targetProgress: number) => {
+      try {
+        const gsapModule = (await import('gsap')) as any;
+        gsapInstance = gsapModule.default ?? gsapModule;
+        gsapAvailable = true;
+        return new Promise<void>((resolve) => {
+          gsapInstance.to(progressObj, {
+            value: targetProgress,
+            duration: 2.5,
+            ease: 'power2.inOut',
+            onUpdate: () => setProgress(progressObj.value),
+            onComplete: () => resolve(),
+          });
+        });
+      } catch (err) {
+        gsapAvailable = false;
+        // Fallback: simple linear increment
+        return new Promise<void>((resolve) => {
+          const start = progressObj.value;
+          const delta = targetProgress - start;
+          const duration = 600; // ms
+          const startTime = performance.now();
+          const step = (t: number) => {
+            const elapsed = t - startTime;
+            const p = Math.min(1, elapsed / duration);
+            progressObj.value = start + delta * p;
+            setProgress(progressObj.value);
+            if (p < 1) requestAnimationFrame(step);
+            else resolve();
+          };
+          requestAnimationFrame(step);
+        });
+      }
+    };
+
+    const updateProgress = async () => {
       loadedCount++;
       const targetProgress = totalAssets > 0 ? (loadedCount / totalAssets) * 100 : 100;
 
-      // Animate the number counting up
-      gsap.to(progressObj, {
-        value: targetProgress,
-        duration: 2.5, // Extremely elegant and smooth progression
-        ease: "power2.inOut",
-        onUpdate: () => {
-          setProgress(progressObj.value); // Float value so Counter rolls continuously vs snappy integers!
-        },
-        onComplete: () => {
-          if (loadedCount === totalAssets || totalAssets === 0) {
-            // Need to wait slightly for the Counter to finish its spring animation
-            setTimeout(triggerOutro, 1800);
-          }
-        }
-      });
+      await animateWithGSAP(targetProgress);
+
+      if (loadedCount === totalAssets || totalAssets === 0) {
+        setTimeout(triggerOutro, 1800);
+      }
     };
 
-    const triggerOutro = () => {
-      const tl = gsap.timeline({
-        onComplete: () => {
+    const triggerOutro = async () => {
+      if (!isSafari()) {
+        try {
+          if (!gsapInstance) {
+            const gsapModule = (await import('gsap')) as any;
+            gsapInstance = gsapModule.default ?? gsapModule;
+          }
+
+          const tl = gsapInstance.timeline({
+            onComplete: () => setIsLoaded(true),
+          });
+
+          tl.to(textRef.current, {
+            scale: 1.5,
+            opacity: 0,
+            duration: 0.8,
+            ease: 'power3.inOut',
+          }).to(
+            containerRef.current,
+            {
+              yPercent: -100,
+              duration: 1.2,
+              ease: 'power4.inOut',
+              roundProps: 'y',
+            },
+            '-=0.4'
+          );
+        } catch (err) {
+          // If GSAP fails, just mark loaded and hide immediately
           setIsLoaded(true);
         }
-      });
-
-      // The "Fking Neatly" exit animation
-      tl.to(textRef.current, {
-        scale: 1.5,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power3.inOut"
-      })
-        .to(containerRef.current, {
-          yPercent: -100, // Slides up like the curtain
-          duration: 1.2,
-          ease: "power4.inOut",
-          roundProps: "y",
-        }, "-=0.4");
+      } else {
+        // Safari fallback: simple CSS transition
+        if (textRef.current) {
+          textRef.current.style.transition = 'transform 0.8s ease, opacity 0.8s ease';
+          textRef.current.style.transform = 'scale(1.5)';
+          textRef.current.style.opacity = '0';
+        }
+        if (containerRef.current) {
+          containerRef.current.style.transition = 'transform 1.2s ease';
+          containerRef.current.style.transform = 'translateY(-100%)';
+        }
+        setTimeout(() => setIsLoaded(true), 1400);
+      }
     };
 
     // Preload Logic
