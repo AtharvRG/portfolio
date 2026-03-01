@@ -7,19 +7,29 @@ export default function ScrollOverlay() {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let ctx: any = null;
+    let ctx: unknown = null;
     let rafId = 0;
+    let cleanupFallback: (() => void) | null = null;
 
     const setupWithGSAP = async () => {
       try {
-        const gsapModule = (await import('gsap')) as any;
-        const ScrollTriggerModule = await import('gsap/ScrollTrigger');
-        const gsap = gsapModule.default ?? gsapModule;
-        const ScrollTrigger = ScrollTriggerModule.ScrollTrigger ?? ScrollTriggerModule.default ?? ScrollTriggerModule;
-        gsap.registerPlugin(ScrollTrigger);
+        const gsapModule = (await import('gsap')) as typeof import('gsap');
+        const ScrollTriggerModule = (await import('gsap/ScrollTrigger')) as typeof import('gsap/ScrollTrigger');
 
-        ctx = gsap.context(() => {
-          gsap.fromTo(
+        type GsapLike = {
+          default?: unknown;
+          registerPlugin?: (p?: unknown) => void;
+          context?: (fn: () => void) => { revert?: () => void };
+          fromTo?: (...args: unknown[]) => void;
+        };
+
+        const gsap = (gsapModule.default as GsapLike) ?? (gsapModule as unknown as GsapLike);
+        const scrollTriggerModuleTyped = ScrollTriggerModule as unknown as { ScrollTrigger?: unknown; default?: unknown };
+        const ScrollTrigger = scrollTriggerModuleTyped.ScrollTrigger ?? scrollTriggerModuleTyped.default ?? ScrollTriggerModule;
+        gsap.registerPlugin?.(ScrollTrigger);
+
+        ctx = gsap.context ? gsap.context(() => {
+          gsap.fromTo?.(
             overlayRef.current,
             { opacity: 0 },
             {
@@ -32,8 +42,8 @@ export default function ScrollOverlay() {
               },
             }
           );
-        });
-      } catch (err) {
+        }) : null;
+      } catch {
         // If GSAP fails to load, fallback to a lightweight scroll handler
         fallbackScroll();
       }
@@ -56,7 +66,7 @@ export default function ScrollOverlay() {
       // Initial set
       onScroll();
       // cleanup will remove listener and cancel raf below
-      (fallbackScroll as any)._cleanup = () => window.removeEventListener('scroll', onScroll);
+      cleanupFallback = () => window.removeEventListener('scroll', onScroll);
     };
 
     if (isSafari()) {
@@ -66,8 +76,9 @@ export default function ScrollOverlay() {
     }
 
     return () => {
-      if (ctx && typeof ctx.revert === 'function') ctx.revert();
-      if ((fallbackScroll as any)._cleanup) (fallbackScroll as any)._cleanup();
+      const maybeCtx = ctx as { revert?: () => void } | null;
+      if (maybeCtx?.revert) maybeCtx.revert();
+      if (cleanupFallback) cleanupFallback();
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, []);

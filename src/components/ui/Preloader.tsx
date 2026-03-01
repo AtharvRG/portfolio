@@ -36,16 +36,20 @@ export default function Preloader() {
     // A proxy object for GSAP to animate the number smoothly — we will lazy-load GSAP.
     const progressObj: { value: number } = { value: 0 };
 
-    let gsapInstance: any = null;
-    let gsapAvailable = false;
+    type GsapLike = {
+      default?: unknown;
+      to?: (...args: unknown[]) => unknown;
+      timeline?: (...args: unknown[]) => { to?: (...args: unknown[]) => unknown };
+    };
+
+    let gsapInstance: GsapLike = {} as GsapLike;
 
     const animateWithGSAP = async (targetProgress: number) => {
       try {
-        const gsapModule = (await import('gsap')) as any;
-        gsapInstance = gsapModule.default ?? gsapModule;
-        gsapAvailable = true;
+        const gsapModule = (await import('gsap')) as typeof import('gsap');
+        gsapInstance = (gsapModule.default as GsapLike) ?? (gsapModule as unknown as GsapLike);
         return new Promise<void>((resolve) => {
-          gsapInstance.to(progressObj, {
+          (gsapInstance.to as ((...args: unknown[]) => unknown))?.(progressObj, {
             value: targetProgress,
             duration: 2.5,
             ease: 'power2.inOut',
@@ -53,8 +57,7 @@ export default function Preloader() {
             onComplete: () => resolve(),
           });
         });
-      } catch (err) {
-        gsapAvailable = false;
+      } catch {
         // Fallback: simple linear increment
         return new Promise<void>((resolve) => {
           const start = progressObj.value;
@@ -88,31 +91,30 @@ export default function Preloader() {
     const triggerOutro = async () => {
       if (!isSafari()) {
         try {
-          if (!gsapInstance) {
-            const gsapModule = (await import('gsap')) as any;
-            gsapInstance = gsapModule.default ?? gsapModule;
+          if (!gsapInstance || !(gsapInstance.timeline)) {
+            const gsapModule = (await import('gsap')) as typeof import('gsap');
+            gsapInstance = (gsapModule.default as GsapLike) ?? (gsapModule as unknown as GsapLike);
           }
 
-          const tl = gsapInstance.timeline({
-            onComplete: () => setIsLoaded(true),
-          });
-
-          tl.to(textRef.current, {
+          // Use single tweens chained via onComplete to avoid relying on Timeline typings
+          const doFirst = (gsapInstance.to as ((...args: unknown[]) => unknown))?.(textRef.current, {
             scale: 1.5,
             opacity: 0,
             duration: 0.8,
             ease: 'power3.inOut',
-          }).to(
-            containerRef.current,
-            {
-              yPercent: -100,
-              duration: 1.2,
-              ease: 'power4.inOut',
-              roundProps: 'y',
+            onComplete: () => {
+              (gsapInstance.to as ((...args: unknown[]) => unknown))?.(containerRef.current, {
+                yPercent: -100,
+                duration: 1.2,
+                ease: 'power4.inOut',
+                roundProps: 'y',
+                onComplete: () => setIsLoaded(true),
+              });
             },
-            '-=0.4'
-          );
-        } catch (err) {
+          });
+          // If `to` is not available, fall back to simply marking loaded
+          if (!doFirst) setIsLoaded(true);
+        } catch {
           // If GSAP fails, just mark loaded and hide immediately
           setIsLoaded(true);
         }

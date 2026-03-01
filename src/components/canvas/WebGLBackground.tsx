@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from 'react';
-import { isSafari, isMobile } from "../../utils/detectBrowser";
+import { isSafari } from "../../utils/detectBrowser";
 
 type GradientStop = { color: string; position: number };
 
@@ -156,20 +156,10 @@ export default function WebGLBackground() {
     const animationFrameRef = useRef<number>(0);
     const startTimeRef = useRef<number>(0);
 
-    // Safari has historically poor WebGL performance on many devices.
-    // Provide a simple CSS gradient fallback to keep the page usable.
-    if (typeof window !== 'undefined' && isSafari()) {
-        const gradientStops = PARAMS.u_gradient.map(s => `${s.color} ${Math.round(s.position * 100)}%`).join(', ');
-        const bg = `linear-gradient(180deg, ${gradientStops})`;
-        return (
-            <div
-                className="fixed inset-0 w-full h-full -z-50 pointer-events-none"
-                style={{ background: bg }}
-            />
-        );
-    }
+    const safari = typeof window !== 'undefined' && isSafari();
 
     useEffect(() => {
+        if (safari) return; // don't run WebGL setup on Safari
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -316,7 +306,18 @@ export default function WebGLBackground() {
             document.removeEventListener('visibilitychange', handleVisibility);
             cancelAnimationFrame(animationFrameRef.current);
         };
-    }, []);
+    }, [safari]);
+
+    if (safari) {
+        const gradientStops = PARAMS.u_gradient.map(s => `${s.color} ${Math.round(s.position * 100)}%`).join(', ');
+        const bg = `linear-gradient(180deg, ${gradientStops})`;
+        return (
+            <div
+                className="fixed inset-0 w-full h-full -z-50 pointer-events-none"
+                style={{ background: bg }}
+            />
+        );
+    }
 
     return (
         <canvas

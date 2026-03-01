@@ -377,7 +377,7 @@ export default function Contact() {
           }, containerRef);
 
           if (observer) observer.disconnect();
-        } catch (err) {
+        } catch {
           // If dynamic import fails, fall back to simple reveal
           fallbackReveal();
           if (observer) observer.disconnect();
