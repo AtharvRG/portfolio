@@ -7,6 +7,7 @@ import { LoadProvider } from "@/context/LoadContext";
 import Preloader from "@/components/ui/Preloader";
 import ScrollOverlay from "@/components/ui/ScrollOverlay";
 import CustomCursor from "@/components/ui/CustomCursor";
+import { Analytics } from "@vercel/analytics/next";
 
 // 1. Primary Display Font (Massive, Wide)
 const oneMore = localFont({
@@ -81,6 +82,7 @@ export default function RootLayout({
             </main>
           </SmoothScroll>
         </LoadProvider>
+        <Analytics />
       </body>
     </html>
   );
