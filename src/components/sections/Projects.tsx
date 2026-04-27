@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Image, { StaticImageData } from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLenis } from '@studio-freight/react-lenis';
 import { ArrowUpRight, X } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ShinyText from '../ui/ShinyText';
 import MoiraiImage from '../../app/assets/Moirai.jpg';
 import NudgeImage from '../../app/assets/Nudge.jpg';
@@ -23,12 +25,34 @@ const projects: Project[] = [
 ];
 
 export default function ProjectsShowcase() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredId, setHoveredId] = useState<string>(projects[0].id);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [mounted, setMounted] = useState(false);
   const lenis = useLenis();
 
   useEffect(() => { setMounted(true); }, []);
+
+  // PROXIMITY SCROLL SNAPPING LOGIC
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: "top bottom", // Starts tracking when top of section hits bottom of screen
+        end: "bottom top", // Ends tracking when bottom hits top
+        snap: {
+          snapTo: 0.5, // 0.5 progress = exactly centered in the viewport
+          duration: { min: 0.6, max: 1.2 }, // Smooth snap duration
+          delay: 0.1, // Wait 100ms after the user stops scrolling to snap
+          ease: "power3.inOut"
+        }
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
 
   useEffect(() => {
     if (activeProject) {
@@ -44,18 +68,15 @@ export default function ProjectsShowcase() {
     };
   }, [activeProject, lenis]);
 
-  // THE FIX: Flawless Interaction Logic
   const handleInteraction = (project: Project) => {
     const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches;
 
     if (!isTouchDevice) {
-      // DESKTOP: A click ALWAYS opens the project instantly. No double-click bugs.
       setHoveredId(project.id);
       setActiveProject(project);
       return;
     }
 
-    // MOBILE: Tap once to preview, tap again (or wait) to open.
     if (hoveredId === project.id) {
       setActiveProject(project);
     } else {
@@ -65,8 +86,7 @@ export default function ProjectsShowcase() {
   };
 
   return (
-
-    <div className="relative h-screen w-full text-zinc-100 font-sans overflow-hidden py-20 z-10">
+    <div ref={containerRef} className="relative h-screen w-full text-zinc-100 font-sans overflow-hidden py-20 z-10">
 
       {/* BACKGROUND QUOTE */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
@@ -118,10 +138,9 @@ export default function ProjectsShowcase() {
               onClick={() => handleInteraction(project)}
               className={`group relative text-lg sm:text-xl md:text-[2.5rem] font-sans uppercase tracking-tighter cursor-pointer transition-colors duration-300 pr-3 md:pr-8 ${hoveredId === project.id ? 'text-zinc-100' : 'text-zinc-500'} ${activeProject ? 'pointer-events-none' : ''}`}
             >
-              {/* THE FIX: Title morphs perfectly from the list into the header! Added cursor-target directly here! */}
               <motion.span
                 layoutId={`project-title-${project.id}`}
-                className="inline-block relative z-10 py-0.5 md:py-1 cursor-target pr-2 md:pr-4 tracking-tighter" // Enforce tracking-tighter globally here
+                className="inline-block relative z-10 py-0.5 md:py-1 cursor-target pr-2 md:pr-4 tracking-tighter"
               >
                 {hoveredId === project.id ? (
                   <span className="inline-block px-1 py-1 leading-normal">{project.title}</span>
@@ -170,7 +189,6 @@ export default function ProjectsShowcase() {
               <div className="relative z-10 w-full max-w-5xl px-6 md:px-12 flex flex-col justify-center max-h-screen overflow-y-auto pointer-events-none">
                 <div className="pointer-events-auto flex flex-col w-full pb-20 pt-20">
 
-                  {/* THE FIX: The title flies in from the list! */}
                   <motion.h1
                     layoutId={`project-title-${activeProject.id}`}
                     className="text-3xl sm:text-4xl md:text-7xl font-display tracking-tighter mb-8 md:mb-12 text-center uppercase text-zinc-100 will-change-transform origin-center"
@@ -179,11 +197,10 @@ export default function ProjectsShowcase() {
                     {activeProject.title}
                   </motion.h1>
 
-                  {/* THE FIX: The image flies in from the preview! */}
                   <motion.div
                     layoutId={`project-image-${activeProject.id}`}
                     className="relative w-full aspect-video md:aspect-[21/9] bg-zinc-900 rounded-2xl md:rounded-3xl overflow-hidden mb-8 md:mb-12 shadow-2xl border border-white/10 will-change-transform"
-                    transition={{ type: "spring", bounce: 0.1, duration: 0.5 }} // Faster, tighter spring for 120fps feel
+                    transition={{ type: "spring", bounce: 0.1, duration: 0.5 }}
                     style={{ transform: "translateZ(0)" }}
                   >
                     <Image src={activeProject.src} alt={activeProject.title} className="object-cover opacity-90" fill unoptimized sizes="100vw" />
@@ -194,7 +211,7 @@ export default function ProjectsShowcase() {
                       <h2 className="text-xl md:text-3xl font-sans uppercase tracking-tight mb-4 text-zinc-100">{activeProject.subtitle}</h2>
                       <p className="text-zinc-400 text-sm md:text-base font-sans">{activeProject.description}</p>
                     </div>
-                    <div className="flex flex-col items-start md:items-end gap-6 md:min-w-[200px]">
+                    <div className="flex flex-col items-start md:items-end gap-6 md:minw-[200px]">
                       <p className="text-zinc-400 text-xs uppercase tracking-widest font-sans md:text-right">Project Links</p>
                       <div className="flex flex-col gap-3">
                         {activeProject.live && (

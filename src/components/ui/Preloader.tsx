@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { isSafari } from "../../utils/detectBrowser";
 import { useLoad } from "@/context/LoadContext";
-import Counter from "./Counter";
 import { StaticImageData } from "next/image";
 import MoiraiImage from '../../app/assets/Moirai.jpg';
 import NudgeImage from '../../app/assets/Nudge.jpg';
@@ -21,165 +19,247 @@ const ASSETS_TO_PRELOAD: (string | StaticImageData)[] = [
 
 export default function Preloader() {
   const { isLoaded, setIsLoaded } = useLoad();
-  // Set accurate loading state starting from 0 and moving up
-  const [progress, setProgress] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const preloaderRef = useRef<HTMLDivElement>(null);
+  
+  // The Shader Hole Element & its inner black cover
+  const irisHoleRef = useRef<HTMLDivElement>(null);
+  const holeCoverRef = useRef<HTMLDivElement>(null);
+
+  // Typography Refs
+  const flexContainerRef = useRef<HTMLDivElement>(null);
+  const textRevealContainerRef = useRef<HTMLDivElement>(null);
+  const textInnerRef = useRef<HTMLDivElement>(null);
+  const slashRef = useRef<HTMLSpanElement>(null);
+  const dotPlaceholderRef = useRef<HTMLDivElement>(null);
+  
+  // Slurp Targets (We include the non-breaking spaces here so they collapse too)
+  const tharvRef = useRef<HTMLSpanElement>(null);
+  const space1Ref = useRef<HTMLSpanElement>(null);
+  const space2Ref = useRef<HTMLSpanElement>(null);
+  const achchiRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (isLoaded) return;
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded || !mounted) return;
 
     let loadedCount = 0;
     const totalAssets = ASSETS_TO_PRELOAD.length;
 
-    // A proxy object for GSAP to animate the number smoothly — we will lazy-load GSAP.
-    const progressObj: { value: number } = { value: 0 };
-
-    type GsapLike = {
-      default?: unknown;
-      to?: (...args: unknown[]) => unknown;
-      timeline?: (...args: unknown[]) => { to?: (...args: unknown[]) => unknown };
-    };
-
-    let gsapInstance: GsapLike = {} as GsapLike;
-
-    const animateWithGSAP = async (targetProgress: number) => {
+    const runAnimation = async () => {
       try {
-        const gsapModule = (await import('gsap')) as typeof import('gsap');
-        gsapInstance = (gsapModule.default as GsapLike) ?? (gsapModule as unknown as GsapLike);
-        return new Promise<void>((resolve) => {
-          (gsapInstance.to as ((...args: unknown[]) => unknown))?.(progressObj, {
-            value: targetProgress,
-            duration: 2.5,
-            ease: 'power2.inOut',
-            onUpdate: () => setProgress(progressObj.value),
-            onComplete: () => resolve(),
-          });
+        const gsapModule = await import("gsap");
+        const gsap = gsapModule.default || gsapModule.gsap;
+
+        // Initialize completely hidden to prevent flashes
+        gsap.set(flexContainerRef.current, { opacity: 0 });
+        gsap.set(textRevealContainerRef.current, { width: 0 });
+        gsap.set(textInnerRef.current, { yPercent: 100, opacity: 0 });
+        gsap.set(slashRef.current, { scaleY: 0, opacity: 0, transformOrigin: "bottom" });
+
+        // Set the initial shader box dimensions
+        gsap.set(irisHoleRef.current, {
+          width: "min(300px, 60vw)",
+          height: "min(400px, 60vh)",
+          borderRadius: "0px",
+          xPercent: -50,
+          yPercent: -50,
+          left: "50%",
+          top: "50%"
         });
+
+        // Tracking function: Keeps the shader hole perfectly tethered to the dot
+        const trackDot = () => {
+          if (!dotPlaceholderRef.current || !irisHoleRef.current) return;
+          const rect = dotPlaceholderRef.current.getBoundingClientRect();
+          gsap.set(irisHoleRef.current, {
+            left: rect.left + rect.width / 2,
+            top: rect.top + rect.height / 2,
+          });
+        };
+
+        const getDotCenterX = () => {
+          const r = dotPlaceholderRef.current?.getBoundingClientRect();
+          return r ? r.left + r.width / 2 : window.innerWidth / 2;
+        };
+
+        const getDotCenterY = () => {
+          const r = dotPlaceholderRef.current?.getBoundingClientRect();
+          return r ? r.top + r.height / 2 : window.innerHeight / 2;
+        };
+
+        const tl = gsap.timeline({
+          onComplete: () => setIsLoaded(true),
+        });
+
+        // 1. Fade in the Shader Box (Opacity of the black cover goes to 0)
+        tl.to(holeCoverRef.current, {
+          opacity: 0,
+          duration: 1.2,
+          ease: "power2.inOut",
+        })
+        .to({}, { duration: 0.2 }) // Slight pause
+
+        // 2. Prep the text container (invisible, but allows dot to position itself in center)
+        .set(flexContainerRef.current, { opacity: 1 })
+
+        // 3. Smoothly Morph the Box into the Dot
+        .to(irisHoleRef.current, {
+          width: () => dotPlaceholderRef.current?.offsetWidth || 15,
+          height: () => dotPlaceholderRef.current?.offsetHeight || 15,
+           left: getDotCenterX,
+           top: getDotCenterY,
+          borderRadius: "50%",
+          duration: 1.4,
+          ease: "expo.inOut"
+        })
+
+        // 4. Slash appears like a lightsaber
+        .to(slashRef.current, {
+          scaleY: 1,
+          opacity: 1,
+          duration: 0.6,
+          ease: "back.out(2)"
+        })
+
+        // 5. "Atharv R Gachchi" whips up from bottom & pushes out from Slash
+        .to(textRevealContainerRef.current, {
+          width: () => textInnerRef.current?.scrollWidth || 0,
+          duration: 1.6,
+          ease: "expo.inOut",
+          onUpdate: trackDot // CRITICAL: Live track dot as the text pushes it right
+        }, "whip")
+        .to(textInnerRef.current, {
+          yPercent: 0,
+          opacity: 1,
+          duration: 1.2,
+          ease: "power3.out",
+        }, "whip+=0.3")
+        
+        .to({}, { duration: 1 }) // Readability Pause
+
+        // 6. Slurp into "ARG"
+        .to([tharvRef.current, space1Ref.current, space2Ref.current, achchiRef.current], {
+          width: 0,
+          opacity: 0,
+          duration: 1.4,
+          ease: "expo.inOut",
+          onUpdate: trackDot // Track the dot as it glides back towards the center
+        })
+
+        .to({}, { duration: 0.6 }) // Pause on "ARG /."
+
+        // 7. Iris Out! Scale the transparent hole massively to reveal the site
+        .to(irisHoleRef.current, {
+          scale: 350, 
+          duration: 1.8,
+          ease: "power4.inOut",
+          onUpdate: trackDot
+        }, "iris")
+        // Fade out the leftover text simultaneously
+        .to(flexContainerRef.current, {
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.inOut"
+        }, "iris");
+
       } catch {
-        // Fallback: simple linear increment
-        return new Promise<void>((resolve) => {
-          const start = progressObj.value;
-          const delta = targetProgress - start;
-          const duration = 600; // ms
-          const startTime = performance.now();
-          const step = (t: number) => {
-            const elapsed = t - startTime;
-            const p = Math.min(1, elapsed / duration);
-            progressObj.value = start + delta * p;
-            setProgress(progressObj.value);
-            if (p < 1) requestAnimationFrame(step);
-            else resolve();
-          };
-          requestAnimationFrame(step);
-        });
+        setIsLoaded(true);
       }
     };
 
-    const updateProgress = async () => {
+    const checkDone = () => {
       loadedCount++;
-      const targetProgress = totalAssets > 0 ? (loadedCount / totalAssets) * 100 : 100;
-
-      await animateWithGSAP(targetProgress);
-
-      if (loadedCount === totalAssets || totalAssets === 0) {
-        setTimeout(triggerOutro, 1800);
+      if (loadedCount >= totalAssets) {
+        setTimeout(runAnimation, 200);
       }
     };
 
-    const triggerOutro = async () => {
-      if (!isSafari()) {
-        try {
-          if (!gsapInstance || !(gsapInstance.timeline)) {
-            const gsapModule = (await import('gsap')) as typeof import('gsap');
-            gsapInstance = (gsapModule.default as GsapLike) ?? (gsapModule as unknown as GsapLike);
-          }
-
-          // Use single tweens chained via onComplete to avoid relying on Timeline typings
-          const doFirst = (gsapInstance.to as ((...args: unknown[]) => unknown))?.(textRef.current, {
-            scale: 1.5,
-            opacity: 0,
-            duration: 0.8,
-            ease: 'power3.inOut',
-            onComplete: () => {
-              (gsapInstance.to as ((...args: unknown[]) => unknown))?.(containerRef.current, {
-                yPercent: -100,
-                duration: 1.2,
-                ease: 'power4.inOut',
-                roundProps: 'y',
-                onComplete: () => setIsLoaded(true),
-              });
-            },
-          });
-          // If `to` is not available, fall back to simply marking loaded
-          if (!doFirst) setIsLoaded(true);
-        } catch {
-          // If GSAP fails, just mark loaded and hide immediately
-          setIsLoaded(true);
-        }
-      } else {
-        // Safari fallback: simple CSS transition
-        if (textRef.current) {
-          textRef.current.style.transition = 'transform 0.8s ease, opacity 0.8s ease';
-          textRef.current.style.transform = 'scale(1.5)';
-          textRef.current.style.opacity = '0';
-        }
-        if (containerRef.current) {
-          containerRef.current.style.transition = 'transform 1.2s ease';
-          containerRef.current.style.transform = 'translateY(-100%)';
-        }
-        setTimeout(() => setIsLoaded(true), 1400);
-      }
-    };
-
-    // Preload Logic
     if (totalAssets === 0) {
-      // If no assets, just fake a 1.5s loading time for the aesthetic
-      setTimeout(updateProgress, 1500);
+      setTimeout(runAnimation, 800);
     } else {
       ASSETS_TO_PRELOAD.forEach((asset) => {
-        // Next.js StaticImageData objects store their URL in the .src property
-        const url = typeof asset === 'string' ? asset : asset.src;
-
+        const url = typeof asset === "string" ? asset : asset.src;
         if (url.endsWith(".mp4") || url.endsWith(".webm")) {
           const video = document.createElement("video");
           video.src = url;
-          video.onloadeddata = updateProgress;
-          video.onerror = updateProgress; // Continue even if one fails
+          video.onloadeddata = checkDone;
+          video.onerror = checkDone; 
         } else {
           const img = new Image();
           img.src = url;
-          img.onload = updateProgress;
-          img.onerror = updateProgress;
+          img.onload = checkDone;
+          img.onerror = checkDone;
         }
       });
     }
-  }, [isLoaded, setIsLoaded]);
+  }, [isLoaded, setIsLoaded, mounted]);
 
   if (isLoaded) return null;
 
   return (
     <div
-      ref={containerRef}
-      // Changed to items-center justify-center
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black overflow-hidden"
+      ref={preloaderRef}
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden pointer-events-auto bg-transparent"
     >
-      <div
-        ref={textRef}
-        className="flex items-end font-display leading-none text-white mix-blend-difference text-center"
+      <div className="absolute inset-0 z-10 w-full h-full" />
+
+      {/* 
+        THE IRIS OUT MASK 
+        A massive 150vmax border acts as our solid black screen.
+        The transparent center is what reveals the WebGL background underneath.
+      */}
+      <div 
+        ref={irisHoleRef}
+        className="fixed z-20 pointer-events-none"
+        style={{
+          boxSizing: 'content-box',
+          border: '150vmax solid #050505',
+          willChange: 'transform, width, height, left, top',
+        }}
       >
-        <Counter
-          value={progress} // Raw float ensures continuous odometer rolling
-          places={[100, 10, 1]} // Forces DOM to keep 100 array intact, stops the components from illegally re-mounting resulting in snaps
-          fontSize={typeof window !== 'undefined' && window.innerWidth > 768 ? 200 : 120} // Safe for SSR routing
-          textColor="white"
-          fontWeight={900}
-          className="font-display tracking-tighter mix-blend-difference" // apply typography class
-          gradientHeight={0}
-          padding={10}
-        />
-        <span className="text-[12vw] md:text-[6vw] leading-none ml-2 tracking-tighter" style={{ marginBottom: typeof window !== 'undefined' && window.innerWidth > 768 ? '1.5rem' : '0.75rem' }}>%</span>
+        <div ref={holeCoverRef} className="w-full h-full bg-[#050505]" />
+      </div>
+
+      {/* THE TYPOGRAPHY ENGINE */}
+      <div 
+        ref={flexContainerRef}
+        className="relative z-30 flex items-end justify-center mix-blend-difference text-white font-display uppercase tracking-tighter text-[11vw] sm:text-[9vw] md:text-[7vw] lg:text-[6vw] leading-none opacity-0"
+      >
+        {/* TEXT REVEAL WRAPPER (Handles horizontal slide out) */}
+        <div 
+          ref={textRevealContainerRef} 
+          className="flex items-end justify-end overflow-hidden whitespace-nowrap pb-2"
+        >
+          {/* INNER TEXT WRAPPER (Handles the vertical whip-up fade) */}
+          <div ref={textInnerRef} className="flex items-end leading-none">
+            <span>A</span>
+            <span ref={tharvRef} className="inline-flex overflow-hidden">THARV</span>
+            
+            {/* Added exact gaps for 'Atharv R Gachchi' */}
+            <span ref={space1Ref} className="inline-flex overflow-hidden w-[0.25em]" />
+            
+            <span>R</span>
+            
+            <span ref={space2Ref} className="inline-flex overflow-hidden w-[0.25em]" />
+            
+            <span>G</span>
+            <span ref={achchiRef} className="inline-flex overflow-hidden">ACHCHI</span>
+          </div>
+        </div>
+
+        {/* THE SLASH & DOT (Perfectly aligned to bottom baseline) */}
+        <div className="flex items-end pb-2 ml-1 sm:ml-2">
+          <span ref={slashRef} className="inline-block leading-none">/</span>
+          <div 
+            ref={dotPlaceholderRef} 
+            className="w-[1.6vw] h-[1.6vw] min-w-[10px] min-h-[10px] rounded-full ml-1 mb-[0.12em]" 
+          />
+        </div>
       </div>
     </div>
   );

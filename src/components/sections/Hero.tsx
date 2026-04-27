@@ -58,7 +58,7 @@ export default function Hero() {
 
         {/* Line 1: Left Aligned */}
         <div className="overflow-hidden flex self-start z-30">
-          <h1 className="eveal-text font-display text-[12vw] sm:text-[10vw] md:text-[10vw] leading-none tracking-tighter text-white uppercase pb-[2vw]">
+          <h1 className="reveal-text font-display text-[12vw] sm:text-[10vw] md:text-[10vw] leading-none tracking-tighter text-white uppercase pb-[2vw]">
             Precision
           </h1>
         </div>
